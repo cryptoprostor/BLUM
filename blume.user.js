@@ -6,8 +6,8 @@
 // @match        https://telegram.blum.codes/*
 // @grant        none
 // @icon         https://cdn.prod.website-files.com/65b6a1a4a0e2af577bccce96/65ba99c1616e21b24009b86c_blum-256.png
-// @downloadURL  https://github.com/cryptoprostor/BLUM/raw/main/blume.clicker.js
-// @updateURL    https://github.com/cryptoprostor/BLUM/raw/main/blume.clicker.js
+// @downloadURL  https://github.com/cryptoprostor/BLUM/raw/main/blume.user.js
+// @updateURL    https://github.com/cryptoprostor/BLUM/raw/main/blume.user.js
 // @homepage     https://github.com/cryptoprostor/BLUM
 // ==/UserScript==
 
