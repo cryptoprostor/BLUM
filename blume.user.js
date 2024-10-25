@@ -22,7 +22,7 @@ let GAME_SETTINGS = {
 };
 
 
-let isGamePaused = false;
+let isGamePaused = true;
 
 try {
 	let gameStats = {
