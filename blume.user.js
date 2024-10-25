@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Blume
-// @version      1.5
+// @version      1.7
 // @namespace    Violentmonkey Scripts
 // @author       cryptoprostor
 // @match        https://telegram.blum.codes/*
@@ -22,7 +22,7 @@ let GAME_SETTINGS = {
 };
 
 
-let isGamePaused = true;
+let isGamePaused = false;
 
 try {
 	let gameStats = {
