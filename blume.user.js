@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Blum Autoclicker
-// @version      2.3
+// @version      2.4
 // @namespace    Violentmonkey Scripts
 // @author       cryptoprostor
 // @match        https://telegram.blum.codes/*
@@ -142,12 +142,6 @@ try {
 
 	function getNewGameDelay() {
 		return Math.floor(Math.random() * (GAME_SETTINGS.maxDelayMs - GAME_SETTINGS.minDelayMs + 1) + GAME_SETTINGS.minDelayMs);
-	}
-
-
-	function continuousPlayButtonCheck() {
-		checkAndClickPlayButton();
-		setTimeout(continuousPlayButtonCheck, 1000);
 	}
 
 	const observer = new MutationObserver(mutations => {
@@ -418,8 +412,6 @@ try {
 		const inputContainer = document.createElement('div');
 		inputContainer.className = 'setting-input';
 
-
-		AutoClaimAndStart();
 
 		let input;
 		if (type === 'checkbox') {
