@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Blum Autoclicker
-// @version      2.4
+// @version      2.5
 // @namespace    Violentmonkey Scripts
 // @author       cryptoprostor
 // @match        https://telegram.blum.codes/*
@@ -15,12 +15,14 @@ let GAME_SETTINGS = {
 	minBombHits: Math.floor(Math.random() * 2),
 	minIceHits: Math.floor(Math.random() * 2) + 2,
 	flowerSkipPercentage: Math.floor(Math.random() * 11) + 15,
+	minDelayMs: 500,
+	maxDelayMs: 999,
 	autoClickPlay: false,
 	dogsProbability: (98 + Math.random()) / 100
 };
 
 
-let isGamePaused = false;
+let isGamePaused = true;
 
 try {
 	let gameStats = {
@@ -110,9 +112,11 @@ try {
 				}
 				item.onClick(item);
 			}
+			
+			item.isExplosion = true;
+			item.addedAt = performance.now();
 		}, getClickDelay());
 	}
-
 
 	// Функция для расчета задержки между кликами
 	function getClickDelay() {
@@ -142,6 +146,25 @@ try {
 
 	function getNewGameDelay() {
 		return Math.floor(Math.random() * (GAME_SETTINGS.maxDelayMs - GAME_SETTINGS.minDelayMs + 1) + GAME_SETTINGS.minDelayMs);
+	}
+
+	function checkAndClickPlayButton() {
+		const playButtons = document.querySelectorAll('button.kit-button.is-large.is-primary, a.play-btn[href="/game"], button.kit-button.is-large.is-primary');
+
+		playButtons.forEach(button => {
+			if (!isGamePaused && GAME_SETTINGS.autoClickPlay && (/Play/.test(button.textContent) || /Continue/.test(button.textContent))) {
+				setTimeout(() => {
+					button.click();
+					gameStats.isGameOver = false;
+				}, getNewGameDelay());
+			}
+		});
+	}
+
+
+	function continuousPlayButtonCheck() {
+		checkAndClickPlayButton();
+		setTimeout(continuousPlayButtonCheck, 1000);
 	}
 
 	const observer = new MutationObserver(mutations => {
@@ -219,7 +242,19 @@ try {
 	pauseResumeButton.onclick = toggleGamePause;
 	settingsMenu.appendChild(pauseResumeButton);
 
+	const socialButtons = document.createElement('div');
+	socialButtons.className = 'social-buttons';
+
 	
+	const telegramButton = document.createElement('a');
+	telegramButton.href = 'https://t.me/CryptoLifeCommunity';
+	telegramButton.target = '_blank';
+	telegramButton.className = 'social-button';
+	telegramButton.innerHTML = '<img src="data:image/png;base64,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">Telegram Channel';
+	socialButtons.appendChild(telegramButton);
+
+	settingsMenu.appendChild(socialButtons);
+
 	document.body.appendChild(settingsMenu);
 
 	const settingsButton = document.createElement('button');
@@ -412,6 +447,22 @@ try {
 		const inputContainer = document.createElement('div');
 		inputContainer.className = 'setting-input';
 
+		function AutoClaimAndStart() {
+			setInterval(() => {
+				const claimButton = document.querySelector('button.kit-button.is-large.is-drop.is-fill.button.is-done');
+				const startFarmingButton = document.querySelector('button.kit-button.is-large.is-primary.is-fill.button');
+				const continueButton = document.querySelector('button.kit-button.is-large.is-primary.is-fill.btn');
+				if (claimButton) {
+					claimButton.click();
+				} else if (startFarmingButton) {
+					startFarmingButton.click();
+				} else if (continueButton) {
+					continueButton.click();
+				}
+			}, Math.floor(Math.random() * 5000) + 5000);
+		}
+
+		AutoClaimAndStart();
 
 		let input;
 		if (type === 'checkbox') {
