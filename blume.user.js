@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Blum Autoclicker
-// @version      2.5
+// @version      2.6
 // @namespace    Violentmonkey Scripts
 // @author       cryptoprostor
 // @match        https://telegram.blum.codes/*
@@ -22,7 +22,7 @@ let GAME_SETTINGS = {
 };
 
 
-let isGamePaused = true;
+let isGamePaused = false;
 
 try {
 	let gameStats = {
@@ -73,11 +73,9 @@ try {
 	}
 
 	function processBomb(item) {
-		if (gameStats.bombHits < GAME_SETTINGS.minBombHits) {
-			gameStats.score = 0;
-			clickElement(item);
-			gameStats.bombHits++;
-		}
+		gameStats.score = 0;
+		clickElement(item);
+		gameStats.bombHits++;
 	}
 
 	function processIce(item) {
@@ -147,43 +145,37 @@ try {
 	function getNewGameDelay() {
 		return Math.floor(Math.random() * (GAME_SETTINGS.maxDelayMs - GAME_SETTINGS.minDelayMs + 1) + GAME_SETTINGS.minDelayMs);
 	}
-
 	function checkAndClickPlayButton() {
 		const playButtons = document.querySelectorAll('button.kit-button.is-large.is-primary, a.play-btn[href="/game"], button.kit-button.is-large.is-primary');
 
 		playButtons.forEach(button => {
 			if (!isGamePaused && GAME_SETTINGS.autoClickPlay && (/Play/.test(button.textContent) || /Continue/.test(button.textContent))) {
 				setTimeout(() => {
+					gameStats.isGameOver = true;
+					resetGameStats();
 					button.click();
-					gameStats.isGameOver = false;
 				}, getNewGameDelay());
 			}
 		});
 	}
 
-
-	function continuousPlayButtonCheck() {
-		checkAndClickPlayButton();
-		setTimeout(continuousPlayButtonCheck, 1000);
-	}
-
-	const observer = new MutationObserver(mutations => {
-		for (const mutation of mutations) {
-			if (mutation.type === 'childList') {
-				checkGameCompletion();
+	function checkAndClickResetButton() {
+		const errorPage = document.querySelector('div[data-v-26af7de6].error.page.wrapper');
+		if (errorPage) {
+			const resetButton = errorPage.querySelector('button.reset');
+			if (resetButton) {
+				resetButton.click();
 			}
 		}
-	});
-
-	const appElement = document.querySelector('#app');
-	if (appElement) {
-		observer.observe(appElement, {
-			childList: true,
-			subtree: true
-		});
 	}
 
-	continuousPlayButtonCheck();
+	function continuousErrorCheck() {
+		checkAndClickResetButton();
+		const delay = Math.floor(Math.random() * 1000) + 2000;
+		setTimeout(continuousErrorCheck, delay);
+	}
+
+	continuousErrorCheck();
 
 	const settingsMenu = document.createElement('div');
 	settingsMenu.className = 'settings-menu';
@@ -245,7 +237,6 @@ try {
 	const socialButtons = document.createElement('div');
 	socialButtons.className = 'social-buttons';
 
-	
 	const telegramButton = document.createElement('a');
 	telegramButton.href = 'https://t.me/CryptoLifeCommunity';
 	telegramButton.target = '_blank';
@@ -446,23 +437,6 @@ try {
 
 		const inputContainer = document.createElement('div');
 		inputContainer.className = 'setting-input';
-
-		function AutoClaimAndStart() {
-			setInterval(() => {
-				const claimButton = document.querySelector('button.kit-button.is-large.is-drop.is-fill.button.is-done');
-				const startFarmingButton = document.querySelector('button.kit-button.is-large.is-primary.is-fill.button');
-				const continueButton = document.querySelector('button.kit-button.is-large.is-primary.is-fill.btn');
-				if (claimButton) {
-					claimButton.click();
-				} else if (startFarmingButton) {
-					startFarmingButton.click();
-				} else if (continueButton) {
-					continueButton.click();
-				}
-			}, Math.floor(Math.random() * 5000) + 5000);
-		}
-
-		AutoClaimAndStart();
 
 		let input;
 		if (type === 'checkbox') {
