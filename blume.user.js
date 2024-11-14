@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Blum Autoclicker
-// @version      2.6
+// @version      2.8
 // @namespace    Violentmonkey Scripts
 // @author       cryptoprostor
 // @match        https://telegram.blum.codes/*
@@ -73,9 +73,11 @@ try {
 	}
 
 	function processBomb(item) {
-		gameStats.score = 0;
-		clickElement(item);
-		gameStats.bombHits++;
+		if (gameStats.bombHits < GAME_SETTINGS.minBombHits) {
+			gameStats.score = 0;
+			clickElement(item);
+			gameStats.bombHits++;
+		}
 	}
 
 	function processIce(item) {
@@ -93,6 +95,7 @@ try {
 	}
 
 	function clickElement(item) {
+		if (isGamePaused) return;
 		const createEvent = (type, EventClass) => new EventClass(type, {
 			bubbles: true,
 			cancelable: true,
